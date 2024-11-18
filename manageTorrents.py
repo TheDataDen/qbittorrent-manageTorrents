@@ -1,5 +1,5 @@
 from threading import Timer
-from datetime import datetime
+from datetime import datetime, timedelta
 import os
 import sys
 import qbittorrentapi
@@ -79,7 +79,16 @@ def run():
     for torrent in manageable_torrents:
         torrent_status = TorrentStates(torrent['state'])
         torrent_hash = torrent['hash']
-
+        
+        if torrent_status == TorrentStates.STOPPED_UPLOAD:
+            state_changed_time = datetime.fromtimestamp(torrent.completion_on)
+            time_in_state = datetime.now() - state_changed_time
+            
+            if time_in_state > timedelta(days=1):
+                log(f"{torrent_hash} has been completed for over a day, deleting")
+                delete_torrent(torrent_hash)
+                continue
+        
         if ((torrent_status == TorrentStates.STALLED_DOWNLOAD or torrent_status == TorrentStates.METADATA_DOWNLOAD) and torrent.priority <= 5):
             if is_moved_to_bottom(torrent_hash):
                 log(f"{torrent_hash} marked as stalled")
