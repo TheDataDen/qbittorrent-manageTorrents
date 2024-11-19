@@ -6,6 +6,7 @@ import qbittorrentapi
 from qbittorrentapi import TorrentStates 
 
 timer = None
+tagName = 'not-managed'
 
 # The qBitorrent WebUI needs to be enabled for this script to work
 host = os.getenv('QBITTORRENT_HOST', '')
@@ -71,10 +72,19 @@ def move_torrent_to_bottom(hash):
 def delete_torrent(hash):
     qbt_client = auth_qbt()
     qbt_client.torrents_delete(True, hash)
+    
+def create_tag_if_not_exists():
+    qbt_client = auth_qbt()
+    
+    existing_tags = qbt_client.torrents_tags()
+    
+    if tagName not in existing_tags:
+        qbt_client.torrents_add_tag(tagName)
+        log(f"Created tag {tagName}")
         
 def run():
     torrents = get_torrents()
-    manageable_torrents = [torrent for torrent in torrents if 'not-managed' not in torrent['tags']]
+    manageable_torrents = [torrent for torrent in torrents if tagName not in torrent['tags']]
     
     for torrent in manageable_torrents:
         torrent_status = TorrentStates(torrent['state'])
