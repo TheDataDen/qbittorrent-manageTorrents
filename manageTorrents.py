@@ -148,6 +148,8 @@ def main():
         log("QBITTORRENT_USERNAME")
         log("QBITTORRENT_PASSWORD")
         sys.exit()
+        
+    create_tag_if_not_exists()
     
     run()
     timer = RepeatedTimer(int(updateTime), run)
