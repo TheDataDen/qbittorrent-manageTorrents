@@ -84,7 +84,7 @@ def create_tag_if_not_exists():
         log(f"Created tag {tagName}")
         
     if mamTagName not in existing_tags:
-        qbt_client.torrents_add_tag(mamTagName)
+        qbt_client.torrents_add_tags(mamTagName)
         log(f"Created tag {mamTagName}")
         
 def run():
