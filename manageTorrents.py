@@ -7,6 +7,7 @@ from qbittorrentapi import TorrentStates
 
 timer = None
 tagName = 'not-managed'
+mamTagName = 'mam'
 
 # The qBitorrent WebUI needs to be enabled for this script to work
 host = os.getenv('QBITTORRENT_HOST', '')
@@ -82,9 +83,20 @@ def create_tag_if_not_exists():
         qbt_client.torrents_add_tag(tagName)
         log(f"Created tag {tagName}")
         
+    if mamTagName not in existing_tags:
+        qbt_client.torrents_add_tag(mamTagName)
+        log(f"Created tag {mamTagName}")
+        
 def run():
     torrents = get_torrents()
-    manageable_torrents = [torrent for torrent in torrents if tagName not in torrent['tags']]
+    
+    for torrent in torrents:
+        for tracker in torrent.trackers:
+            if "myanonamouse.net" in tracker.url and mamTagName not in torrent['tags']:
+                torrent.add_tags(mamTagName)
+                log(f"Added tag {mamTagName} to {torrent.name}")
+    
+    manageable_torrents = [torrent for torrent in torrents if tagName not in torrent['tags'] and mamTagName not in torrent['tags']]
     
     for torrent in manageable_torrents:
         torrent_status = TorrentStates(torrent['state'])
