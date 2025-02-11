@@ -95,6 +95,9 @@ def run():
             if "myanonamouse.net" in tracker.url and mamTagName not in torrent['tags']:
                 torrent.add_tags(mamTagName)
                 log(f"Added tag {mamTagName} to {torrent.name}")
+                
+                torrent.set_force_start(True)
+                log(f"Force started {torrent.name}")
     
     manageable_torrents = [torrent for torrent in torrents if tagName not in torrent['tags'] and mamTagName not in torrent['tags']]
     
